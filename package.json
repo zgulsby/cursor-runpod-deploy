@@ -22,16 +22,16 @@
     "gpu",
     "cloud-compute"
   ],
-  "author": "Your Name",
+  "author": "Zach Gulsby",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/cursor-runpod-deploy.git"
+    "url": "https://github.com/zgulsby/cursor-runpod-deploy.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/cursor-runpod-deploy/issues"
+    "url": "https://github.com/zgulsby/cursor-runpod-deploy/issues"
   },
-  "homepage": "https://github.com/yourusername/cursor-runpod-deploy#readme",
+  "homepage": "https://github.com/zgulsby/cursor-runpod-deploy#readme",
   "engines": {
     "node": ">=18.0.0"
   },
