@@ -120,4 +120,4 @@ MANIFEST
 *.env
 
 # Test files
-test-direct-deploy.js
+test-direct-deploy.jsvenv/
