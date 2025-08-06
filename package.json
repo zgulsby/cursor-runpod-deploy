@@ -1,0 +1,40 @@
+{
+  "name": "cursor-runpod-deploy",
+  "version": "1.0.0",
+  "description": "Deploy code to Runpod serverless endpoints directly from Cursor IDE or command line",
+  "type": "module",
+  "main": "deploy.js",
+  "bin": {
+    "runpod-deploy": "./deploy.js"
+  },
+  "scripts": {
+    "deploy": "node deploy.js",
+    "mcp:build": "cd tools/runpod-mcp && npm run build",
+    "mcp:dev": "cd tools/runpod-mcp && npm run dev"
+  },
+  "keywords": [
+    "runpod",
+    "serverless",
+    "deployment",
+    "cursor",
+    "mcp",
+    "ai",
+    "gpu",
+    "cloud-compute"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/cursor-runpod-deploy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/cursor-runpod-deploy/issues"
+  },
+  "homepage": "https://github.com/yourusername/cursor-runpod-deploy#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

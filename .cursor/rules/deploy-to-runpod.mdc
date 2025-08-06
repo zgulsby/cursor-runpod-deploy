@@ -1,0 +1,71 @@
+---
+description: Local dev workflow for building the Cursor × Runpod deploy tool (MCP + worker).
+globs:
+  - "**/*"
+alwaysApply: false
+---
+
+# Builder Workflow: Cursor × Runpod
+
+You are assisting me in building a Cursor MCP server named runpod-deploy and a minimal Runpod serverless worker for test deployments.
+
+## Goals
+- Create a Node/TypeScript MCP server at tools/runpod-mcp/ that exposes a tool runpod.deploy.
+- Tool parameters:
+  - endpointId: string
+  - workdirOrFile: string
+  - entrypoint?: string
+  - env?: Record<string,string>
+  - sync?: boolean (default true)
+- Tool behavior:
+  1) Package the target code (zip directory or read single file).
+  2) Call Runpod Serverless via the JS SDK using RUNPOD_API_KEY from env.
+  3) If sync is true, use /runsync and return result plus logs; otherwise use /run and return jobId (optionally poll).
+
+## Implementation Notes
+- Use direct HTTP requests to Runpod API (no official JS SDK available)
+- Payload limits: 10MB for async (/run), 20MB for sync (/runsync)  
+- Result expiration: 30min for async, 1min for sync jobs
+- Rate limits: 1000 async req/10s, 2000 sync req/10s
+- Implement exponential backoff for rate limit handling
+
+## When I say "scaffold" or "build"
+1. Scaffold MCP server in tools/runpod-mcp/ (TypeScript): source in src/, build to dist/.
+2. Create package.json with scripts: dev, build, start:stdio (stdio transport).
+3. Implement deployToRunpod(args) that:
+   - Validates payload size against Runpod limits
+   - Makes direct HTTP requests to https://api.runpod.ai/v2/{endpoint_id}/
+   - Handles rate limiting with 429 responses
+   - Implements proper error handling for timeouts and failures
+   - Zips artifacts when workdirOrFile is a directory.
+   - Builds a payload matching a simple test worker contract.
+   - Calls the Runpod endpoint via the JS SDK: prefer runSync() for short tasks; use run() plus status() polling for longer tasks.
+4. Generate a minimal Runpod worker (Python or Node) that accepts { entrypoint?, file?, artifact?, env? } and returns a short result/log for testing.
+
+## When I say "wire it up"
+- Create or update .cursor/mcp.json to register an MCP server named runpod-deploy-local using stdio:
+  {
+    "mcpServers": {
+      "runpod-deploy-local": {
+        "command": "node",
+        "args": ["./tools/runpod-mcp/dist/index.js"],
+        "env": { "RUNPOD_API_KEY": "${env:RUNPOD_API_KEY}" }
+      }
+    }
+  }
+- Remind me to export RUNPOD_API_KEY in my shell.
+
+## When I say "test"
+- Build the MCP server, start stdio, then from Composer call the tool runpod.deploy with:
+  {
+    "endpointId": "<TEST_ENDPOINT_ID>",
+    "workdirOrFile": "<path/to/file/or/dir>",
+    "entrypoint": "<optional-entry>",
+    "sync": true
+  }
+- Print a compact summary: endpoint id, duration, first 100 lines of logs, and a short result snippet.
+
+## Conventions
+- Always confirm endpointId and sync/async before running.
+- Never print secret values; refer to env var names instead.
+- Prefer small payloads for sync tests; use async plus polling for long jobs.
