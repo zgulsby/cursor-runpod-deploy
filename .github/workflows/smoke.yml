@@ -1,0 +1,42 @@
+name: cursor-runpod-deploy smoke
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps (if any)
+        run: |
+          if [ -f package.json ]; then
+            npm ci || true
+          fi
+
+      - name: Sanity — help output
+        run: node deploy.js --help
+
+      - name: Sync deploy single file
+        env:
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+        run: |
+          node deploy.js ${{ secrets.RUNPOD_ENDPOINT_ID }} ./test-hello.py -p test-hello.py | tee output.txt
+          grep -E "Status: *COMPLETED" output.txt
+
+      - name: Async deploy directory (smoke)
+        if: always()
+        env:
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+        run: |
+          mkdir -p tmpdir && cp test-hello.py tmpdir/main.py
+          node deploy.js ${{ secrets.RUNPOD_ENDPOINT_ID }} ./tmpdir --async || true
