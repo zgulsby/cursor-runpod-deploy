@@ -17,37 +17,8 @@ jobs:
         with:
           node-version: '20'
 
-      # Root deps (optional)
-      - name: Install root deps (if any)
-        run: |
-          if [ -f package.json ]; then
-            if [ -f pnpm-lock.yaml ]; then
-              corepack enable
-              pnpm i --frozen-lockfile || pnpm i
-            elif [ -f yarn.lock ]; then
-              corepack enable
-              yarn install --immutable || yarn install
-            else
-              if [ -f package-lock.json ]; then npm ci; else npm install; fi
-            fi
-          fi
-
-      # --- Build the MCP package so dist/ exists ---
-      - name: Build tools/runpod-mcp
-        working-directory: tools/runpod-mcp
-        run: |
-          if [ -f pnpm-lock.yaml ]; then
-            corepack enable
-            pnpm i --frozen-lockfile || pnpm i
-            pnpm build || npx tsc -p tsconfig.json
-          elif [ -f yarn.lock ]; then
-            corepack enable
-            yarn install --immutable || yarn install
-            yarn build || npx tsc -p tsconfig.json
-          else
-            if [ -f package-lock.json ]; then npm ci; else npm install; fi
-            npm run build || npx tsc -p tsconfig.json
-          fi
+      - name: Install with workspaces (builds MCP via prepare)
+        run: npm ci
 
       - name: Sanity — help output
         run: node deploy.js --help
