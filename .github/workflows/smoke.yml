@@ -8,6 +8,7 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    environment: ci-smoke
     steps:
       - name: Checkout
         uses: actions/checkout@v4
